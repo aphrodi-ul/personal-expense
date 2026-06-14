@@ -1,0 +1,23 @@
+# Render Blueprint — deploy with one click from the repo:
+#   https://render.com  ->  New  ->  Blueprint  ->  pick this repo
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: personal-expense-tracker
+    runtime: node
+    plan: starter            # a paid plan is required for the persistent disk below
+    buildCommand: npm ci
+    startCommand: node server/index.js
+    healthCheckPath: /login.html
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "24"          # node:sqlite is built in and flag-free on Node 24
+      - key: JWT_SECRET
+        generateValue: true  # Render generates a strong random secret
+      - key: DB_PATH
+        value: /var/data/data.db
+    disk:
+      name: data
+      mountPath: /var/data   # SQLite file lives here so it survives deploys/restarts
+      sizeGB: 1

@@ -167,11 +167,52 @@ personal-expense-tracker/
 - **No build step**: vanilla frontend + CDN Chart.js means there's nothing to
   compile — just `npm install && npm start`.
 
+## Deployment
+
+The repo ships with both a **Dockerfile** (any container host) and a **Render
+Blueprint** (`render.yaml`). In all cases, set a strong `JWT_SECRET` and point
+`DB_PATH` at **persistent storage** — otherwise the SQLite file is wiped on each
+redeploy/restart.
+
+> Requires a Node ≥ 22.5 runtime. The provided configs pin **Node 24**, where
+> `node:sqlite` is built in and needs no flags.
+
+### Option A — Render (one click via Blueprint)
+1. Push this repo to GitHub (already done).
+2. On [Render](https://render.com): **New → Blueprint**, select the repo. It reads
+   `render.yaml`, provisions the web service, **auto-generates `JWT_SECRET`**, and
+   mounts a 1 GB disk at `/var/data` for the database.
+3. Deploy. Your app is live at `https://<service>.onrender.com`.
+
+> The persistent disk in `render.yaml` requires a paid plan (Starter). For a
+> free, *demo-only* deploy, remove the `disk:` block and set `DB_PATH` to a local
+> path (e.g. `./data.db`) — note the database resets on each restart.
+
+### Option B — Docker (Railway, Fly.io, Cloud Run, a VPS, …)
+```bash
+docker build -t expense-tracker .
+docker run -p 3000:3000 \
+  -e JWT_SECRET="$(openssl rand -hex 32)" \
+  -e DB_PATH=/data/data.db \
+  -v expense_data:/data \
+  expense-tracker
+```
+The named volume (`-v expense_data:/data`) keeps your data across container
+restarts. On Railway/Fly, attach a volume mounted at `/data` and set the same
+env vars in the dashboard.
+
+### Required environment variables
+| Variable     | Required | Notes                                            |
+|--------------|----------|--------------------------------------------------|
+| `JWT_SECRET` | **Yes**  | Long random string; signs auth tokens            |
+| `DB_PATH`    | **Yes**  | Path on a persistent volume (e.g. `/data/data.db`) |
+| `PORT`       | No       | Set automatically by most hosts                  |
+
 ## Possible next steps
 - Date-range filtering and monthly trend (bar/line) chart
 - Editable categories / budgets per category
 - Pagination for large datasets
-- Deployment (e.g. Render/Railway/Fly.io) — set `JWT_SECRET` and a persistent `DB_PATH`
+- Swap SQLite for Postgres if multi-instance horizontal scaling is needed
 
 ## License
 MIT

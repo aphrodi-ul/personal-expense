@@ -1,10 +1,13 @@
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const { DatabaseSync } = require('node:sqlite');
 const { DB_PATH } = require('./config');
 
 const dbFile = DB_PATH || path.join(__dirname, '..', 'data.db');
+// Ensure the target directory exists (e.g. a mounted volume path like /var/data).
+fs.mkdirSync(path.dirname(dbFile), { recursive: true });
 const db = new DatabaseSync(dbFile);
 
 // Schema. Created once; safe to run on every startup.
