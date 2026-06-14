@@ -185,8 +185,9 @@ redeploy/restart.
 3. Deploy. Your app is live at `https://<service>.onrender.com`.
 
 > The persistent disk in `render.yaml` requires a paid plan (Starter). For a
-> free, *demo-only* deploy, remove the `disk:` block and set `DB_PATH` to a local
-> path (e.g. `./data.db`) — note the database resets on each restart.
+> free, *demo-only* deploy, use the ready-made **`render.free.yaml`** instead
+> (no disk, ephemeral SQLite — data resets on restart). Render only reads a file
+> named `render.yaml`, so rename it first: `git mv render.free.yaml render.yaml`.
 
 ### Option B — Docker (Railway, Fly.io, Cloud Run, a VPS, …)
 ```bash
