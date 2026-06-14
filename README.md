@@ -27,6 +27,20 @@ Built with **Node.js + Express** and **SQLite** (via Node's built-in
 
 ---
 
+## Screenshots
+
+| Dashboard | Login / register |
+|-----------|------------------|
+| ![Dashboard](screenshots/02-dashboard.png) | ![Login](screenshots/01-login.png) |
+
+| Filter by category | Mobile (responsive) |
+|--------------------|---------------------|
+| ![Filter](screenshots/03-filter-food.png) | <img src="screenshots/04-mobile.png" width="280" /> |
+
+> Reproduce these with `node scripts/screenshots.js` (requires Chrome; see the script header).
+
+---
+
 ## Tech stack
 
 | Layer     | Choice                                             |
