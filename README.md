@@ -198,17 +198,21 @@ redeploy/restart.
 > Requires a Node ≥ 22.5 runtime. The provided configs pin **Node 24**, where
 > `node:sqlite` is built in and needs no flags.
 
-### Option A — Render (one click via Blueprint)
+### Option A — Render (one click via Blueprint) — FREE
 1. Push this repo to GitHub (already done).
-2. On [Render](https://render.com): **New → Blueprint**, select the repo. It reads
-   `render.yaml`, provisions the web service, **auto-generates `JWT_SECRET`**, and
-   mounts a 1 GB disk at `/var/data` for the database.
-3. Deploy. Your app is live at `https://<service>.onrender.com`.
+2. On [Render](https://render.com): **New → Blueprint**, select the repo (or use the
+   Deploy button at the top). It reads `render.yaml`, provisions a **free** web
+   service, and **auto-generates `JWT_SECRET`**.
+3. Deploy. Your app is live at `https://<service>.onrender.com` — link to that from
+   your website.
 
-> The persistent disk in `render.yaml` requires a paid plan (Starter). For a
-> free, *demo-only* deploy, use the ready-made **`render.free.yaml`** instead
-> (no disk, ephemeral SQLite — data resets on restart). Render only reads a file
-> named `render.yaml`, so rename it first: `git mv render.free.yaml render.yaml`.
+> **Free plan caveats:** the service sleeps after ~15 min idle (first visit then
+> takes ~30–50s to wake), and has no persistent disk, so the SQLite database
+> **resets on restart**. Fine for a demo.
+>
+> **Want durable data?** Use `render.persistent.yaml` (adds a 1 GB disk, requires
+> a paid Starter plan). Render only reads a file named `render.yaml`, so rename it
+> first: `git mv render.persistent.yaml render.yaml`.
 
 ### Option B — Docker (Railway, Fly.io, Cloud Run, a VPS, …)
 ```bash

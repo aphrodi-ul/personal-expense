@@ -1,11 +1,16 @@
-# Render Blueprint — deploy with one click from the repo:
+# Render Blueprint — FREE plan (the default; powers the one-click Deploy button).
 #   https://render.com  ->  New  ->  Blueprint  ->  pick this repo
+#
+# Free web services cost $0 but: they sleep after ~15 min of inactivity (the next
+# visit takes ~30-50s to wake), and there is NO persistent disk — so the SQLite
+# database resets on every restart/redeploy. Great for a demo or to check it out.
+# For durable data, use render.persistent.yaml instead (paid disk).
 # Docs: https://render.com/docs/blueprint-spec
 services:
   - type: web
     name: personal-expense-tracker
     runtime: node
-    plan: starter            # a paid plan is required for the persistent disk below
+    plan: free
     buildCommand: npm ci
     startCommand: node server/index.js
     healthCheckPath: /login.html
@@ -16,8 +21,4 @@ services:
       - key: JWT_SECRET
         generateValue: true  # Render generates a strong random secret
       - key: DB_PATH
-        value: /var/data/data.db
-    disk:
-      name: data
-      mountPath: /var/data   # SQLite file lives here so it survives deploys/restarts
-      sizeGB: 1
+        value: ./data.db     # ephemeral on free tier — resets on restart
