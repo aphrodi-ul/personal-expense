@@ -13,17 +13,26 @@ Built with **Node.js + Express** and **SQLite** (via Node's built-in
 ## Features
 
 **Core**
-- Add expenses with **amount, category, description, date**
-- **REST API**: create, read, update, delete expenses
-- View all expenses in a **responsive table**
-- **Filter by category**
-- **Total spending** (overall and for the current filter)
+- Add transactions with **amount, category, description, date**
+- **REST API**: create, read, update, delete
+- View everything in a **responsive, sortable table**
+- **Filter** by category, type, **date range** (this month / 30 days / year / custom) and **search**
+- **Totals** — expenses, income, net balance, average/day, biggest expense
 - **Input validation** on both client and server
 
-**Bonus (all included)**
+**Money management**
+- 💸 **Income tracking & net balance** — log income alongside expenses
+- 🎯 **Per-category budgets** — monthly limits with progress bars and over-budget alerts
+- 🔁 **Recurring transactions** — auto-generated each month (e.g. rent, salary)
+- 🏷️ **Custom categories** — add/remove your own
+
+**Data & UX**
 - 🔐 **User authentication** — register / login with JWT, bcrypt-hashed passwords
-- 📊 **Charts** — spending-by-category doughnut chart (Chart.js)
-- 📁 **CSV export** — download all your expenses
+- 📊 **Charts** — spending-by-category doughnut + monthly income/expense trend (Chart.js)
+- 📁 **CSV export & import** — download a filtered set or bulk-add from CSV
+- 🧾 **Receipt images** — attach a photo to any transaction
+- 🌙 **Dark mode**, 🖨️ **print / save-as-PDF** report
+- ⚙️ **Account settings** — change password, export all data, delete account
 
 ---
 
@@ -37,7 +46,8 @@ Built with **Node.js + Express** and **SQLite** (via Node's built-in
 |--------------------|---------------------|
 | ![Filter](screenshots/03-filter-food.png) | <img src="screenshots/04-mobile.png" width="280" /> |
 
-> Reproduce these with `node scripts/screenshots.js` (requires Chrome; see the script header).
+> Screenshots are regenerated with `node scripts/uitest.js` / `node scripts/screenshots.js`
+> (requires Chrome; see each script header). Some may lag behind the latest UI.
 
 ---
 

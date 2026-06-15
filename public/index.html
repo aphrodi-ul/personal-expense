@@ -14,127 +14,254 @@
         <span class="brand-name">Expense Tracker</span>
       </div>
       <div class="topbar-right">
+        <button class="icon-btn" id="themeToggle" type="button" title="Toggle dark mode" aria-label="Toggle theme">🌙</button>
         <span class="user-email" id="userEmail"></span>
         <button class="btn btn-ghost" id="logoutBtn" type="button">Log out</button>
       </div>
     </div>
+    <nav class="tabsnav" id="tabsnav">
+      <button class="navtab active" data-view="dashboard" type="button">Dashboard</button>
+      <button class="navtab" data-view="budgets" type="button">Budgets</button>
+      <button class="navtab" data-view="recurring" type="button">Recurring</button>
+      <button class="navtab" data-view="categories" type="button">Categories</button>
+      <button class="navtab" data-view="settings" type="button">Settings</button>
+    </nav>
   </header>
 
   <main class="container">
-    <!-- Summary cards -->
-    <section class="cards">
-      <div class="card stat">
-        <span class="stat-label">Total spending</span>
-        <span class="stat-value" id="statTotal">$0.00</span>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section class="view" id="view-dashboard">
+      <!-- Summary cards -->
+      <section class="cards">
+        <div class="card stat"><span class="stat-label">Expenses</span><span class="stat-value neg" id="statExpense">$0.00</span></div>
+        <div class="card stat"><span class="stat-label">Income</span><span class="stat-value pos" id="statIncome">$0.00</span></div>
+        <div class="card stat"><span class="stat-label">Net balance</span><span class="stat-value" id="statNet">$0.00</span></div>
+        <div class="card stat"><span class="stat-label">Avg / day</span><span class="stat-value" id="statAvg">$0.00</span></div>
+        <div class="card stat"><span class="stat-label">Biggest</span><span class="stat-value" id="statBiggest">—</span></div>
+      </section>
+
+      <!-- Budget alerts -->
+      <div id="budgetAlerts"></div>
+
+      <div class="grid">
+        <!-- Add / edit form -->
+        <section class="card form-card">
+          <h2 id="formTitle">Add transaction</h2>
+          <form id="expenseForm" novalidate>
+            <input type="hidden" id="expenseId" />
+            <input type="hidden" id="receiptData" />
+
+            <div class="seg" id="typeSeg" role="tablist">
+              <button type="button" class="seg-btn active" data-type="expense">Expense</button>
+              <button type="button" class="seg-btn" data-type="income">Income</button>
+            </div>
+
+            <label for="amount">Amount</label>
+            <div class="input-prefix">
+              <span>$</span>
+              <input id="amount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+            </div>
+
+            <label for="category">Category</label>
+            <select id="category" required></select>
+
+            <label for="date">Date</label>
+            <input id="date" type="date" required />
+
+            <label for="description">Description <span class="muted">(optional)</span></label>
+            <input id="description" type="text" maxlength="500" placeholder="e.g. Lunch with team" />
+
+            <label for="receipt">Receipt image <span class="muted">(optional)</span></label>
+            <input id="receipt" type="file" accept="image/*" />
+            <div class="receipt-preview" id="receiptPreview" hidden>
+              <img id="receiptThumb" alt="receipt preview" />
+              <button type="button" class="btn btn-ghost btn-sm" id="receiptClear">Remove</button>
+            </div>
+
+            <p class="error" id="formError" hidden></p>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit" id="saveBtn">Add transaction</button>
+              <button class="btn btn-ghost" type="button" id="cancelEditBtn" hidden>Cancel</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Charts -->
+        <section class="card chart-card">
+          <h2>Spending by category</h2>
+          <div class="chart-wrap"><canvas id="categoryChart"></canvas></div>
+          <p class="empty" id="chartEmpty" hidden>No expenses in this range yet.</p>
+          <hr class="divider" />
+          <div class="chart-head">
+            <h2>Monthly trend</h2>
+            <select id="trendMonths" class="mini-select">
+              <option value="6">6 months</option>
+              <option value="12">12 months</option>
+              <option value="3">3 months</option>
+            </select>
+          </div>
+          <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+        </section>
       </div>
-      <div class="card stat">
-        <span class="stat-label">Expenses</span>
-        <span class="stat-value" id="statCount">0</span>
-      </div>
-      <div class="card stat">
-        <span class="stat-label">Top category</span>
-        <span class="stat-value" id="statTop">—</span>
-      </div>
+
+      <!-- Table -->
+      <section class="card table-card">
+        <div class="table-toolbar">
+          <h2>Transactions</h2>
+          <div class="toolbar-controls">
+            <input id="searchBox" type="search" class="search" placeholder="Search description…" />
+            <select id="filterRange">
+              <option value="month">This month</option>
+              <option value="30">Last 30 days</option>
+              <option value="year">This year</option>
+              <option value="all" selected>All time</option>
+              <option value="custom">Custom…</option>
+            </select>
+            <input id="fromDate" type="date" class="range-date" hidden />
+            <input id="toDate" type="date" class="range-date" hidden />
+            <select id="filterType">
+              <option value="All">All types</option>
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+            <select id="filterCategory"><option value="All">All categories</option></select>
+            <button class="btn btn-secondary" id="exportBtn" type="button">Export CSV</button>
+            <button class="btn btn-secondary" id="importBtn" type="button">Import CSV</button>
+            <button class="btn btn-ghost" id="printBtn" type="button">Print / PDF</button>
+            <input id="importFile" type="file" accept=".csv,text/csv" hidden />
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table id="expenseTable">
+            <thead>
+              <tr>
+                <th class="sortable" data-sort="date">Date</th>
+                <th class="sortable" data-sort="type">Type</th>
+                <th class="sortable" data-sort="category">Category</th>
+                <th>Description</th>
+                <th class="num sortable" data-sort="amount">Amount</th>
+                <th class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="expenseRows"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="foot-label">Total (filtered)</td>
+                <td class="num" id="filteredTotal">$0.00</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <p class="empty" id="tableEmpty" hidden>No transactions match these filters.</p>
+      </section>
     </section>
 
-    <div class="grid">
-      <!-- Add / edit form -->
-      <section class="card form-card">
-        <h2 id="formTitle">Add expense</h2>
-        <form id="expenseForm" novalidate>
-          <input type="hidden" id="expenseId" />
-
-          <label for="amount">Amount</label>
+    <!-- ===================== BUDGETS ===================== -->
+    <section class="view" id="view-budgets" hidden>
+      <section class="card">
+        <h2>Set a monthly budget</h2>
+        <form id="budgetForm" class="inline-form">
+          <select id="budgetCategory" required></select>
           <div class="input-prefix">
             <span>$</span>
-            <input id="amount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+            <input id="budgetLimit" type="number" step="0.01" min="0.01" placeholder="Monthly limit" required />
           </div>
-
-          <label for="category">Category</label>
-          <select id="category" required>
-            <option value="">Select a category…</option>
-            <option>Food</option>
-            <option>Transport</option>
-            <option>Housing</option>
-            <option>Utilities</option>
-            <option>Entertainment</option>
-            <option>Health</option>
-            <option>Shopping</option>
-            <option>Other</option>
-          </select>
-
-          <label for="date">Date</label>
-          <input id="date" type="date" required />
-
-          <label for="description">Description <span class="muted">(optional)</span></label>
-          <input id="description" type="text" maxlength="500" placeholder="e.g. Lunch with team" />
-
-          <p class="error" id="formError" hidden></p>
-
-          <div class="form-actions">
-            <button class="btn btn-primary" type="submit" id="saveBtn">Add expense</button>
-            <button class="btn btn-ghost" type="button" id="cancelEditBtn" hidden>Cancel</button>
-          </div>
+          <button class="btn btn-primary" type="submit">Save budget</button>
         </form>
+        <p class="error" id="budgetError" hidden></p>
       </section>
 
-      <!-- Chart -->
-      <section class="card chart-card">
-        <h2>Spending by category</h2>
-        <div class="chart-wrap">
-          <canvas id="categoryChart"></canvas>
-        </div>
-        <p class="empty" id="chartEmpty" hidden>No expenses yet — add one to see the breakdown.</p>
+      <section class="card">
+        <h2>This month's budgets</h2>
+        <div id="budgetList"></div>
+        <p class="empty" id="budgetEmpty" hidden>No budgets set yet. Add one above.</p>
       </section>
-    </div>
-
-    <!-- Table -->
-    <section class="card table-card">
-      <div class="table-toolbar">
-        <h2>Expenses</h2>
-        <div class="toolbar-controls">
-          <label class="sr-only" for="filterCategory">Filter by category</label>
-          <select id="filterCategory">
-            <option value="All">All categories</option>
-            <option>Food</option>
-            <option>Transport</option>
-            <option>Housing</option>
-            <option>Utilities</option>
-            <option>Entertainment</option>
-            <option>Health</option>
-            <option>Shopping</option>
-            <option>Other</option>
-          </select>
-          <button class="btn btn-secondary" id="exportBtn" type="button">Export CSV</button>
-        </div>
-      </div>
-
-      <div class="table-scroll">
-        <table id="expenseTable">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Category</th>
-              <th>Description</th>
-              <th class="num">Amount</th>
-              <th class="actions-col">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="expenseRows"></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="3" class="foot-label">Total (filtered)</td>
-              <td class="num" id="filteredTotal">$0.00</td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-      <p class="empty" id="tableEmpty" hidden>No expenses match this filter.</p>
     </section>
+
+    <!-- ===================== RECURRING ===================== -->
+    <section class="view" id="view-recurring" hidden>
+      <section class="card">
+        <h2>Add a recurring transaction</h2>
+        <form id="recurringForm" class="inline-form wrap">
+          <select id="recType"><option value="expense">Expense</option><option value="income">Income</option></select>
+          <div class="input-prefix"><span>$</span><input id="recAmount" type="number" step="0.01" min="0.01" placeholder="Amount" required /></div>
+          <select id="recCategory" required></select>
+          <input id="recDesc" type="text" placeholder="Description (optional)" maxlength="500" />
+          <label class="dom-label">Day
+            <input id="recDay" type="number" min="1" max="31" value="1" required />
+          </label>
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+        <p class="error" id="recError" hidden></p>
+        <p class="hint">Recurring items are added to your transactions automatically each month once their day arrives (also when you open the app).</p>
+      </section>
+
+      <section class="card">
+        <div class="table-toolbar">
+          <h2>Recurring transactions</h2>
+          <button class="btn btn-secondary" id="runRecurringBtn" type="button">Generate due now</button>
+        </div>
+        <div id="recurringList"></div>
+        <p class="empty" id="recurringEmpty" hidden>No recurring transactions yet.</p>
+      </section>
+    </section>
+
+    <!-- ===================== CATEGORIES ===================== -->
+    <section class="view" id="view-categories" hidden>
+      <section class="card">
+        <h2>Add a category</h2>
+        <form id="categoryForm" class="inline-form">
+          <input id="categoryName" type="text" placeholder="e.g. Subscriptions" maxlength="50" required />
+          <button class="btn btn-primary" type="submit">Add category</button>
+        </form>
+        <p class="error" id="categoryError" hidden></p>
+      </section>
+      <section class="card">
+        <h2>Your categories</h2>
+        <div id="categoryList" class="chips"></div>
+      </section>
+    </section>
+
+    <!-- ===================== SETTINGS ===================== -->
+    <section class="view" id="view-settings" hidden>
+      <section class="card">
+        <h2>Change password</h2>
+        <form id="passwordForm" class="stack-form">
+          <input id="currentPassword" type="password" placeholder="Current password" autocomplete="current-password" required />
+          <input id="newPassword" type="password" placeholder="New password (min 6 chars)" autocomplete="new-password" required />
+          <button class="btn btn-primary" type="submit">Update password</button>
+        </form>
+        <p class="msg" id="passwordMsg" hidden></p>
+      </section>
+
+      <section class="card">
+        <h2>Your data</h2>
+        <p class="muted">Download everything you've recorded as a CSV file.</p>
+        <button class="btn btn-secondary" id="exportAllBtn" type="button">Export all data (CSV)</button>
+      </section>
+
+      <section class="card danger-zone">
+        <h2>Delete account</h2>
+        <p class="muted">Permanently deletes your account and all transactions, budgets, categories and recurring items. This cannot be undone.</p>
+        <form id="deleteForm" class="inline-form">
+          <input id="deletePassword" type="password" placeholder="Confirm your password" autocomplete="current-password" required />
+          <button class="btn btn-danger" type="submit">Delete my account</button>
+        </form>
+        <p class="error" id="deleteError" hidden></p>
+      </section>
+    </section>
+
   </main>
 
-  <!-- Chart.js (CDN) -->
+  <!-- Receipt lightbox -->
+  <div class="lightbox" id="lightbox" hidden>
+    <img id="lightboxImg" alt="receipt" />
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
