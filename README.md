@@ -8,6 +8,17 @@ Built with **Node.js + Express** and **SQLite** (via Node's built-in
 `node:sqlite` module — no native build step). The frontend is plain
 **HTML / CSS / JavaScript** with **Chart.js** for visualizations.
 
+### Live demo / linking from your site
+This is a full-stack app (Node backend), so it **cannot run on GitHub Pages**
+(static-only). Deploy it to a host once, then link to that URL from your website.
+One-click deploy:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/aphrodi-ul/personal-expense)
+
+After it deploys you'll get a URL like `https://personal-expense.onrender.com` —
+put that in a link on your site:
+`<a href="https://personal-expense.onrender.com">Open Expense Tracker</a>`
+
 ---
 
 ## Features
